@@ -131,15 +131,31 @@
             background-color: #bbb;
         }
 
+        /* Game Link Styling (New) */
+        .game-link {
+            text-decoration: none; /* Remove underline */
+            color: inherit; /* Keep text color */
+            display: block; /* Make the whole card clickable */
+            margin-bottom: 15px; /* Use link for margin spacing */
+        }
+        .game-link:hover .game-card {
+            border-color: var(--secondary);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .game-link .game-card {
+            transition: all 0.3s ease;
+        }
+        
         /* Game Cards */
         .game-card {
             background: white;
             border: 1px solid #ddd;
             padding: 15px;
-            margin-bottom: 15px;
+            /* Removed margin-bottom and moved it to .game-link */
             border-radius: 5px;
             display: flex;
-            flex-direction: column; /* Changed to column to handle footer better */
+            flex-direction: column; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
@@ -227,11 +243,12 @@
     
     // 1. EDIT STANDINGS HERE
     const teams = [
+        // Carsons (1-0) will now correctly show 1.000 PCT.
         { name: "Carsons Exhibition Team", conference: "Large 4", wins: 1, losses: 0, streak: "T1" },
         { name: "Averitts Exhibition Team", conference: "Large 4", wins: 1, losses: 1, streak: "T1" },
     ];
 
-    // 2. EDIT GAMES HER
+    // 2. EDIT GAMES HERE
     // You can now add 'location' and 'note' to any game
     const games = [
            { 
@@ -267,6 +284,11 @@
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
 
+    // Preprocess games to add a unique ID for linking
+    games.forEach((game, index) => {
+        game.id = index + 1;
+    });
+
     function loadStandings() {
         const tbody = document.getElementById('standings-body');
         tbody.innerHTML = '';
@@ -284,10 +306,18 @@
             confTeams.forEach(team => {
                 const totalGames = team.wins + team.losses;
                 let pct = ".000";
+                
                 if (totalGames > 0) {
-                    pct = (team.wins / totalGames).toFixed(3).substring(1);
+                    const pctValue = (team.wins / totalGames).toFixed(3);
+                    
+                    // FIX: Correctly handle 1.000 (perfect record)
+                    if (pctValue.startsWith('1')) {
+                         pct = pctValue; // Keeps "1.000"
+                    } else {
+                         pct = pctValue.substring(1); // Converts "0.500" to ".500"
+                    }
                 }
-                const gb = leaderWins - team.wins; 
+                const gb = (leaderWins - team.wins) / 2; // Games behind is half the difference in the W-L columns
                 
                 const row = `<tr>
                     <td style="text-align: left; font-weight:bold; padding-left: 20px;">${team.name}</td>
@@ -307,17 +337,23 @@
         const locationHTML = game.location ? `<div class="game-location">📍 ${game.location}</div>` : '';
         const footerHTML = game.note ? `<div class="game-footer">${game.note}</div>` : '';
 
-        return `<div class="game-card">
-            <div class="game-main">
-                <div>
-                    <div class="game-info">${game.date}</div>
-                    ${locationHTML}
-                    <div class="matchup">${game.visitor} @ ${game.home}</div>
+        // Create a unique URL using the game's ID
+        const gameUrl = `game_details.html?id=${game.id}`; 
+        
+        // Wrap the entire card in a link
+        return `<a href="${gameUrl}" class="game-link" target="_blank">
+            <div class="game-card">
+                <div class="game-main">
+                    <div>
+                        <div class="game-info">${game.date}</div>
+                        ${locationHTML}
+                        <div class="matchup">${game.visitor} @ ${game.home}</div>
+                    </div>
+                    <div class="score">${game.score}</div>
                 </div>
-                <div class="score">${game.score}</div>
+                ${footerHTML}
             </div>
-            ${footerHTML}
-        </div>`;
+        </a>`;
     }
 
     function showGames(filterType) {
@@ -325,7 +361,8 @@
         const buttons = document.querySelectorAll('.btn');
         
         buttons.forEach(btn => btn.classList.remove('active'));
-        if(event) event.target.classList.add('active');
+        // Safely access event target
+        if(event && event.target) event.target.classList.add('active');
 
         const filteredGames = games.filter(g => g.type === filterType);
         
