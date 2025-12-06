@@ -340,7 +340,7 @@
         </div>`;
     }
     
-    // Function to open a new tab with game details using a Data URL
+    // Function to open a new tab with game details using a very short Data URL
     function openGameDetailsTab(gameId) {
         const game = games.find(g => g.id === gameId);
         if (!game) return;
@@ -349,63 +349,36 @@
         const matchup = `${game.visitor} @ ${game.home}`;
         const location = game.location || 'Not specified';
         const score = game.score;
-        const note = game.note || 'No special notes.';
 
-        // Full HTML content for the new page
-        const newPageContent = `
+        // Minimal HTML content for the new page
+        // This includes just the core data points in basic format
+        const minimalContent = `
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>OBL Game | ${matchup}</title>
-                <style>
-                    /* Styles for the new tab */
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
-                    .game-details { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-                    h1 { color: #cc0a0a; border-bottom: 3px solid #1208cc; padding-bottom: 10px; }
-                    .info-block { margin-bottom: 20px; }
-                    .info-block label { font-weight: bold; color: #333; display: block; margin-bottom: 5px; }
-                    .info-block span { font-size: 1.1rem; color: #555; }
-                    .score-box { background: #333; color: white; padding: 15px 25px; border-radius: 5px; font-size: 2rem; font-family: monospace; display: inline-block; margin-top: 15px; }
-                    .note-section { border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 15px; font-style: italic; color: #666; }
-                </style>
+                <title>OBL Game</title>
             </head>
             <body>
-                <div class="game-details">
-                    <h1>Game Details: ${matchup}</h1>
-
-                    <div class="info-block">
-                        <label>Date</label>
-                        <span>${date}</span>
-                    </div>
-
-                    <div class="info-block">
-                        <label>Location</label>
-                        <span>📍 ${location}</span>
-                    </div>
-
-                    <div class="info-block">
-                        <label>Final Score / Current Status</label>
-                        <div class="score-box">${score}</div>
-                    </div>
-
-                    <div class="note-section">
-                        <label>Special Note / Tournament Info</label>
-                        <p>${note}</p>
-                    </div>
-
-                    <p><a href="javascript:window.close();">Close Tab</a></p>
-                </div>
+                <h2>Game Details</h2>
+                <p><strong>Matchup:</strong> ${matchup}</p>
+                <p><strong>Date:</strong> ${date}</p>
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Score:</strong> ${score}</p>
             </body>
             </html>
         `;
 
         // Encode the content for a Data URL
-        const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(newPageContent);
+        // We use a simplified Data URL format to keep the URL as short as possible.
+        const dataUrl = 'data:text/html,' + encodeURIComponent(minimalContent.trim());
 
         // Open the new tab using the Data URL
-        window.open(dataUrl, '_blank');
+        const newWindow = window.open(dataUrl, '_blank');
+         if (!newWindow) {
+            // Fallback: This code runs if the browser prevents the pop-up (often seen when the dynamic URL is too long/complex)
+            alert('Your browser blocked the new tab. Please check pop-up settings or try clicking the card again.');
+        }
     }
 
 
