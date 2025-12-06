@@ -33,6 +33,25 @@
         header h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; }
         header p { margin: 5px 0 0; opacity: 0.9; font-style: italic; }
 
+        /* Rulebook Button */
+        .rulebook-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 20px;
+            background-color: white;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 20px;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .rulebook-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
         /* Container */
         .container {
             max-width: 1000px;
@@ -70,7 +89,17 @@
             font-size: 0.9rem;
         }
 
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        /* Conference Header Row Style */
+        .conf-header {
+            background-color: #e0e0e0;
+            font-weight: 800;
+            color: var(--dark);
+            text-align: left;
+            padding-left: 15px;
+            letter-spacing: 1px;
+            font-size: 0.95rem;
+        }
+
         tr:hover { background-color: #f1f1f1; }
         
         /* Win Percentage Column color */
@@ -133,6 +162,7 @@
 <header>
     <h1>OBL</h1>
     <p>Onehit Baseball League</p>
+    <a href="OBL_Rulebook_Complete.txt" class="rulebook-btn" target="_blank">View Rulebook</a>
 </header>
 
 <div class="container">
@@ -177,9 +207,10 @@
     /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
     
     // 1. EDIT STANDINGS HERE
+    // Added 'conference' property to each team
     const teams = [
-        { name: "Carsons Exhibition Team", wins: 0, losses: 0, streak: "W0" },
-        { name: "Averitts Exhibtion Team",  wins: 0, losses: 0, streak: "W0" },
+        { name: "Carsons Exhibition Team", conference: "East", wins: 0, losses: 0, streak: "W0" },
+        { name: "Averitts Exhibition Team", conference: "West", wins: 0, losses: 0, streak: "W0" },
     ];
 
     // 2. EDIT GAMES HERE
@@ -196,24 +227,44 @@
         const tbody = document.getElementById('standings-body');
         tbody.innerHTML = '';
 
-        // Sort teams by Wins (highest to lowest)
-        teams.sort((a, b) => b.wins - a.wins);
+        // Get unique conferences and sort them
+        const conferences = [...new Set(teams.map(t => t.conference))].sort();
 
-        const leaderWins = teams[0].wins;
-
-        teams.forEach(team => {
-            const pct = (team.wins / (team.wins + team.losses)).toFixed(3).substring(1); // .800
-            const gb = leaderWins - team.wins; 
+        conferences.forEach(conf => {
+            // 1. Filter teams for this conference
+            const confTeams = teams.filter(t => t.conference === conf);
             
-            const row = `<tr>
-                <td style="text-align: left; font-weight:bold;">${team.name}</td>
-                <td>${team.wins}</td>
-                <td>${team.losses}</td>
-                <td class="pct">${pct}</td>
-                <td>${gb === 0 ? '-' : gb}</td>
-                <td>${team.streak}</td>
-            </tr>`;
-            tbody.innerHTML += row;
+            // 2. Sort teams by Wins (highest to lowest)
+            confTeams.sort((a, b) => b.wins - a.wins);
+
+            // 3. Add Conference Header Row
+            tbody.innerHTML += `<tr><td colspan="6" class="conf-header">${conf} Conference</td></tr>`;
+
+            // 4. Determine Leader Wins for GB Calculation
+            const leaderWins = confTeams[0].wins;
+
+            // 5. Render Team Rows
+            confTeams.forEach(team => {
+                const totalGames = team.wins + team.losses;
+                let pct = ".000";
+                
+                // Calculate PCT safely (avoid dividing by zero)
+                if (totalGames > 0) {
+                    pct = (team.wins / totalGames).toFixed(3).substring(1);
+                }
+
+                const gb = leaderWins - team.wins; 
+                
+                const row = `<tr>
+                    <td style="text-align: left; font-weight:bold; padding-left: 20px;">${team.name}</td>
+                    <td>${team.wins}</td>
+                    <td>${team.losses}</td>
+                    <td class="pct">${pct}</td>
+                    <td>${gb === 0 ? '-' : gb}</td>
+                    <td>${team.streak}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
         });
     }
 
@@ -223,7 +274,7 @@
         
         // Update buttons
         buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        if(event) event.target.classList.add('active');
 
         // Filter and Render games
         const filteredGames = games.filter(g => g.type === filterType);
@@ -250,19 +301,25 @@
     // Initialize
     loadStandings();
     
-    // Simulate clicking "This Week" on load to show initial games
-    // We manually trigger the logic for 'current' without the event object
+    // Simulate clicking "This Week" on load
+    // We pass null or dummy event to reuse logic if needed, 
+    // but here we just run the rendering manually for the default view.
     const initialGames = games.filter(g => g.type === 'current');
-    const container = document.getElementById('games-list');
-    initialGames.forEach(game => {
-        container.innerHTML += `<div class="game-card">
-            <div>
-                <div class="game-info">${game.date}</div>
-                <div class="matchup">${game.visitor} @ ${game.home}</div>
-            </div>
-            <div class="score">${game.score}</div>
-        </div>`;
-    });
+    const containerEl = document.getElementById('games-list');
+    
+    if(initialGames.length === 0) {
+        containerEl.innerHTML = '<p>No games found for this period.</p>';
+    } else {
+        initialGames.forEach(game => {
+            containerEl.innerHTML += `<div class="game-card">
+                <div>
+                    <div class="game-info">${game.date}</div>
+                    <div class="matchup">${game.visitor} @ ${game.home}</div>
+                </div>
+                <div class="score">${game.score}</div>
+            </div>`;
+        });
+    }
 
 </script>
 
