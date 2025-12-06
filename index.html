@@ -7,8 +7,8 @@
     <style>
         /* --- CSS STYLING --- */
         :root {
-            --primary: #004d40; /* Dark Green */
-            --secondary: #ffca28; /* Baseball Gold */
+            --primary: #cc0a0a; /* RED */
+            --secondary: #1208cc; /* BLUE */
             --light: #f4f4f9;
             --dark: #333;
         }
@@ -177,22 +177,16 @@
     
     // 1. EDIT STANDINGS HERE
     const teams = [
-        { name: "Thunder", wins: 8, losses: 2, streak: "W3" },
-        { name: "Vipers",  wins: 6, losses: 4, streak: "L1" },
-        { name: "Cobras",  wins: 5, losses: 5, streak: "W1" },
-        { name: "Eagles",  wins: 1, losses: 9, streak: "L5" }
+        { name: "Carsons Exhibition Team", wins: 0, losses: 0, streak: "W0" },
+        { name: "Averitts Exhibtion Team",  wins: 0, losses: 0, streak: "W0" },
     ];
 
     // 2. EDIT GAMES HERE
     // Type can be 'current' or 'previous'
     const games = [
-        { type: 'current', date: 'Oct 24', home: 'Thunder', visitor: 'Vipers', score: '4 - 2' },
-        { type: 'current', date: 'Oct 25', home: 'Cobras', visitor: 'Eagles', score: 'TBD' },
-        { type: 'current', date: 'Oct 26', home: 'Vipers', visitor: 'Cobras', score: 'TBD' },
+        { type: 'current', date: 'Dec 6', home: 'Averitts Exhibition Team', visitor: 'Carsons Exhibiton Team', score: '4 - 2' },
         
-        { type: 'previous', date: 'Oct 17', home: 'Eagles', visitor: 'Thunder', score: '1 - 9' },
-        { type: 'previous', date: 'Oct 10', home: 'Cobras', visitor: 'Vipers', score: '3 - 5' },
-        { type: 'previous', date: 'Oct 03', home: 'Thunder', visitor: 'Cobras', score: '2 - 1' }
+        { type: 'previous', date: 'Dec 29 (2024)', home: 'Averitts Exhibition Team', visitor: 'Carsons Exhibition Team', score: '42 - 45 (2 OT)' },
     ];
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
