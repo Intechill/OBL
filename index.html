@@ -227,21 +227,31 @@
     
     // 1. EDIT STANDINGS HERE
     const teams = [
-        { name: "Carsons Exhibition Team", conference: "Large 4", wins: 0, losses: 0, streak: "W0" },
-        { name: "Averitts Exhibition Team", conference: "Large 4", wins: 0, losses: 0, streak: "W0" },
+        { name: "Carsons Exhibition Team", conference: "Large 4", wins: 1, losses: 0, streak: "T1" },
+        { name: "Averitts Exhibition Team", conference: "Large 4", wins: 1, losses: 1, streak: "T1" },
     ];
 
-    // 2. EDIT GAMES HERE
+    // 2. EDIT GAMES HER
     // You can now add 'location' and 'note' to any game
     const games = [
+           { 
+            type: 'current', 
+            date: 'Dec 6', 
+            home: 'Averitts Exhibition Team', 
+            visitor: 'Carsons Exhibiton Team', 
+            score: '5-5 (3P)', 
+            location: 'Pat Raker Field', 
+            note: 'Exhibition Rule Shootout Test' 
+        },
+        
         { 
             type: 'current', 
             date: 'Dec 6', 
             home: 'Averitts Exhibition Team', 
             visitor: 'Carsons Exhibiton Team', 
-            score: 'TBD (A.E.T -6.5)', 
-            location: 'Main Stadium', 
-            note: 'Pre-Season Exhibition Tournament' 
+            score: '10-9', 
+            location: 'Pat Raker Field', 
+            note: 'Exhibition Rule Test Game' 
         },
         
         { 
@@ -250,7 +260,7 @@
             home: 'Averitts Exhibition Team', 
             visitor: 'Carsons Exhibition Team', 
             score: '45 - 42 (2 OT)', 
-            location: 'Field 2',
+            location: 'Pat Raker Field',
             note: '' 
         },
     ];
