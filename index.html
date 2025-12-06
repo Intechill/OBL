@@ -131,32 +131,23 @@
             background-color: #bbb;
         }
 
-        /* Game Link Styling (New) */
-        .game-link {
-            text-decoration: none; /* Remove underline */
-            color: inherit; /* Keep text color */
-            display: block; /* Make the whole card clickable */
-            margin-bottom: 15px; /* Use link for margin spacing */
-        }
-        .game-link:hover .game-card {
-            border-color: var(--secondary);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        .game-link .game-card {
-            transition: all 0.3s ease;
-        }
-        
-        /* Game Cards */
+        /* Game Cards (Now clickable) */
         .game-card {
             background: white;
             border: 1px solid #ddd;
             padding: 15px;
-            /* Removed margin-bottom and moved it to .game-link */
+            margin-bottom: 15px; /* Re-added margin here */
             border-radius: 5px;
             display: flex;
             flex-direction: column; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer; /* Indicates clickability */
+            transition: all 0.3s ease; /* for hover effect */
+        }
+        .game-card:hover { /* Hover effect */
+            border-color: var(--secondary);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
         .game-main {
@@ -189,6 +180,70 @@
             margin-top: 50px;
             font-size: 0.8rem;
             color: #777;
+        }
+
+        /* --- Modal (Popup) Styles (NEW) --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top of everything */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            margin-top: -10px;
+            margin-right: -5px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        #modal-matchup {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        #modal-location, #modal-date, #modal-note {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        #modal-score {
+            display: inline-block;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -238,6 +293,19 @@
     &copy; 2024 Onehit Baseball League | Official League Website
 </footer>
 
+<div id="game-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeGameModal()">&times;</span>
+        <h3 id="modal-matchup"></h3>
+        <p id="modal-date"></p>
+        <p id="modal-location"></p>
+        <div id="modal-score" class="score"></div>
+        <div id="modal-note"></div>
+        <hr style="border-color: #ddd;">
+        <p>This is the detailed view. Add any box scores or statistics here.</p>
+    </div>
+</div>
+
 <script>
     /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
     
@@ -278,13 +346,13 @@
             visitor: 'Carsons Exhibition Team', 
             score: '45 - 42 (2 OT)', 
             location: 'Pat Raker Field',
-            note: '' 
+            note: 'First game of the year.' 
         },
     ];
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
 
-    // Preprocess games to add a unique ID for linking
+    // Preprocess games to add a unique ID for modal usage
     games.forEach((game, index) => {
         game.id = index + 1;
     });
@@ -317,7 +385,8 @@
                          pct = pctValue.substring(1); // Converts "0.500" to ".500"
                     }
                 }
-                const gb = (leaderWins - team.wins) / 2; // Games behind is half the difference in the W-L columns
+                // Games behind is calculated as half the difference between the leader's win-loss total and the team's win-loss total.
+                const gb = ((leaderWins - team.wins) + (team.losses - confTeams[0].losses)) / 2;
                 
                 const row = `<tr>
                     <td style="text-align: left; font-weight:bold; padding-left: 20px;">${team.name}</td>
@@ -333,28 +402,50 @@
     }
 
     function renderGameCard(game) {
-        // Logic to check if note/location exists so we don't print "undefined" or empty boxes
         const locationHTML = game.location ? `<div class="game-location">📍 ${game.location}</div>` : '';
         const footerHTML = game.note ? `<div class="game-footer">${game.note}</div>` : '';
 
-        // Create a unique URL using the game's ID
-        const gameUrl = `game_details.html?id=${game.id}`; 
-        
-        // Wrap the entire card in a link
-        return `<a href="${gameUrl}" class="game-link" target="_blank">
-            <div class="game-card">
-                <div class="game-main">
-                    <div>
-                        <div class="game-info">${game.date}</div>
-                        ${locationHTML}
-                        <div class="matchup">${game.visitor} @ ${game.home}</div>
-                    </div>
-                    <div class="score">${game.score}</div>
+        // Added onclick to call the modal function with the game's unique ID
+        return `<div class="game-card" onclick="openGameModal(${game.id})">
+            <div class="game-main">
+                <div>
+                    <div class="game-info">${game.date}</div>
+                    ${locationHTML}
+                    <div class="matchup">${game.visitor} @ ${game.home}</div>
                 </div>
-                ${footerHTML}
+                <div class="score">${game.score}</div>
             </div>
-        </a>`;
+            ${footerHTML}
+        </div>`;
     }
+    
+    // NEW: Function to open the modal and populate its content
+    function openGameModal(gameId) {
+        const game = games.find(g => g.id === gameId);
+        if (!game) return;
+
+        document.getElementById('modal-matchup').textContent = `${game.visitor} @ ${game.home}`;
+        document.getElementById('modal-date').textContent = `Date: ${game.date}`;
+        document.getElementById('modal-location').textContent = game.location ? `Location: ${game.location}` : 'Location: Not specified';
+        document.getElementById('modal-score').textContent = game.score;
+        document.getElementById('modal-note').innerHTML = game.note ? `<strong>Note:</strong> ${game.note}` : '';
+
+        document.getElementById('game-modal').style.display = 'block';
+    }
+
+    // NEW: Function to close the modal
+    function closeGameModal() {
+        document.getElementById('game-modal').style.display = 'none';
+    }
+
+    // NEW: Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('game-modal');
+        if (event.target === modal) {
+            closeGameModal();
+        }
+    }
+
 
     function showGames(filterType) {
         const container = document.getElementById('games-list');
