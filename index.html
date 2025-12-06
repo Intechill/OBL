@@ -340,7 +340,7 @@
         </div>`;
     }
     
-    // NEW: Function to open a new tab with game details
+    // Function to open a new tab with game details using a Data URL
     function openGameDetailsTab(gameId) {
         const game = games.find(g => g.id === gameId);
         if (!game) return;
@@ -401,10 +401,11 @@
             </html>
         `;
 
-        // Open new tab and write content
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write(newPageContent);
-        newWindow.document.close();
+        // Encode the content for a Data URL
+        const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(newPageContent);
+
+        // Open the new tab using the Data URL
+        window.open(dataUrl, '_blank');
     }
 
 
