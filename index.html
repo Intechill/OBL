@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBL | Onehit Baseball League</title>
+    <style>
+        /* --- CSS STYLING --- */
+        :root {
+            --primary: #004d40; /* Dark Green */
+            --secondary: #ffca28; /* Baseball Gold */
+            --light: #f4f4f9;
+            --dark: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 5px solid var(--secondary);
+        }
+
+        header h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; }
+        header p { margin: 5px 0 0; opacity: 0.9; font-style: italic; }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        /* Section Headings */
+        h2 {
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+            margin-top: 40px;
+            color: var(--primary);
+        }
+
+        /* Standings Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--dark);
+            color: white;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        /* Win Percentage Column color */
+        td.pct { font-weight: bold; color: var(--primary); }
+
+        /* Schedule Controls */
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ccc;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn:hover:not(.active) {
+            background-color: #bbb;
+        }
+
+        /* Game Cards */
+        .game-card {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-info { font-size: 0.85rem; color: #666; }
+        .matchup { font-weight: bold; font-size: 1.1rem; }
+        .score { font-family: monospace; font-size: 1.2rem; background: #eee; padding: 5px 10px; border-radius: 5px; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>OBL</h1>
+    <p>Onehit Baseball League</p>
+</header>
+
+<div class="container">
+
+    <section id="standings">
+        <h2>League Standings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: left;">Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>PCT</th>
+                    <th>GB</th>
+                    <th>Streak</th>
+                </tr>
+            </thead>
+            <tbody id="standings-body">
+                </tbody>
+        </table>
+    </section>
+
+    <section id="schedule">
+        <h2>Game Schedule</h2>
+        
+        <div class="controls">
+            <button class="btn active" onclick="showGames('current')">This Week</button>
+            <button class="btn" onclick="showGames('previous')">Previous Weeks</button>
+        </div>
+
+        <div id="games-list">
+            </div>
+    </section>
+
+</div>
+
+<footer>
+    &copy; 2024 Onehit Baseball League | Official League Website
+</footer>
+
+<script>
+    /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
+    
+    // 1. EDIT STANDINGS HERE
+    const teams = [
+        { name: "Thunder", wins: 8, losses: 2, streak: "W3" },
+        { name: "Vipers",  wins: 6, losses: 4, streak: "L1" },
+        { name: "Cobras",  wins: 5, losses: 5, streak: "W1" },
+        { name: "Eagles",  wins: 1, losses: 9, streak: "L5" }
+    ];
+
+    // 2. EDIT GAMES HERE
+    // Type can be 'current' or 'previous'
+    const games = [
+        { type: 'current', date: 'Oct 24', home: 'Thunder', visitor: 'Vipers', score: '4 - 2' },
+        { type: 'current', date: 'Oct 25', home: 'Cobras', visitor: 'Eagles', score: 'TBD' },
+        { type: 'current', date: 'Oct 26', home: 'Vipers', visitor: 'Cobras', score: 'TBD' },
+        
+        { type: 'previous', date: 'Oct 17', home: 'Eagles', visitor: 'Thunder', score: '1 - 9' },
+        { type: 'previous', date: 'Oct 10', home: 'Cobras', visitor: 'Vipers', score: '3 - 5' },
+        { type: 'previous', date: 'Oct 03', home: 'Thunder', visitor: 'Cobras', score: '2 - 1' }
+    ];
+
+    /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
+
+    function loadStandings() {
+        const tbody = document.getElementById('standings-body');
+        tbody.innerHTML = '';
+
+        // Sort teams by Wins (highest to lowest)
+        teams.sort((a, b) => b.wins - a.wins);
+
+        const leaderWins = teams[0].wins;
+
+        teams.forEach(team => {
+            const pct = (team.wins / (team.wins + team.losses)).toFixed(3).substring(1); // .800
+            const gb = leaderWins - team.wins; 
+            
+            const row = `<tr>
+                <td style="text-align: left; font-weight:bold;">${team.name}</td>
+                <td>${team.wins}</td>
+                <td>${team.losses}</td>
+                <td class="pct">${pct}</td>
+                <td>${gb === 0 ? '-' : gb}</td>
+                <td>${team.streak}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function showGames(filterType) {
+        const container = document.getElementById('games-list');
+        const buttons = document.querySelectorAll('.btn');
+        
+        // Update buttons
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filter and Render games
+        const filteredGames = games.filter(g => g.type === filterType);
+        
+        container.innerHTML = '';
+
+        if (filteredGames.length === 0) {
+            container.innerHTML = '<p>No games found for this period.</p>';
+            return;
+        }
+
+        filteredGames.forEach(game => {
+            const card = `<div class="game-card">
+                <div>
+                    <div class="game-info">${game.date}</div>
+                    <div class="matchup">${game.visitor} @ ${game.home}</div>
+                </div>
+                <div class="score">${game.score}</div>
+            </div>`;
+            container.innerHTML += card;
+        });
+    }
+
+    // Initialize
+    loadStandings();
+    
+    // Simulate clicking "This Week" on load to show initial games
+    // We manually trigger the logic for 'current' without the event object
+    const initialGames = games.filter(g => g.type === 'current');
+    const container = document.getElementById('games-list');
+    initialGames.forEach(game => {
+        container.innerHTML += `<div class="game-card">
+            <div>
+                <div class="game-info">${game.date}</div>
+                <div class="matchup">${game.visitor} @ ${game.home}</div>
+            </div>
+            <div class="score">${game.score}</div>
+        </div>`;
+    });
+
+</script>
+
+</body>
+</html>
