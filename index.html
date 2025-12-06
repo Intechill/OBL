@@ -136,7 +136,7 @@
             background: white;
             border: 1px solid #ddd;
             padding: 15px;
-            margin-bottom: 15px; /* Re-added margin here */
+            margin-bottom: 15px; 
             border-radius: 5px;
             display: flex;
             flex-direction: column; 
@@ -180,70 +180,6 @@
             margin-top: 50px;
             font-size: 0.8rem;
             color: #777;
-        }
-
-        /* --- Modal (Popup) Styles (NEW) --- */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 100; /* Sit on top of everything */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-        }
-
-        .modal-content {
-            background-color: var(--light);
-            margin: 10% auto; /* 10% from the top and centered */
-            padding: 25px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-            max-width: 600px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            position: relative;
-            color: var(--dark);
-        }
-
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-            margin-top: -10px;
-            margin-right: -5px;
-        }
-
-        .close-btn:hover,
-        .close-btn:focus {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        #modal-matchup {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
-
-        #modal-location, #modal-date, #modal-note {
-            font-style: italic;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        #modal-score {
-            display: inline-block;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -293,31 +229,16 @@
     &copy; 2024 Onehit Baseball League | Official League Website
 </footer>
 
-<div id="game-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeGameModal()">&times;</span>
-        <h3 id="modal-matchup"></h3>
-        <p id="modal-date"></p>
-        <p id="modal-location"></p>
-        <div id="modal-score" class="score"></div>
-        <div id="modal-note"></div>
-        <hr style="border-color: #ddd;">
-        <p>This is the detailed view. Add any box scores or statistics here.</p>
-    </div>
-</div>
-
 <script>
     /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
     
     // 1. EDIT STANDINGS HERE
     const teams = [
-        // Carsons (1-0) will now correctly show 1.000 PCT.
         { name: "Carsons Exhibition Team", conference: "Large 4", wins: 1, losses: 0, streak: "T1" },
         { name: "Averitts Exhibition Team", conference: "Large 4", wins: 1, losses: 1, streak: "T1" },
     ];
 
     // 2. EDIT GAMES HERE
-    // You can now add 'location' and 'note' to any game
     const games = [
            { 
             type: 'current', 
@@ -346,13 +267,13 @@
             visitor: 'Carsons Exhibition Team', 
             score: '45 - 42 (2 OT)', 
             location: 'Pat Raker Field',
-            note: 'First game of the year.' 
+            note: '' 
         },
     ];
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
 
-    // Preprocess games to add a unique ID for modal usage
+    // Preprocess games to add a unique ID for use in the new tab function
     games.forEach((game, index) => {
         game.id = index + 1;
     });
@@ -378,14 +299,14 @@
                 if (totalGames > 0) {
                     const pctValue = (team.wins / totalGames).toFixed(3);
                     
-                    // FIX: Correctly handle 1.000 (perfect record)
                     if (pctValue.startsWith('1')) {
-                         pct = pctValue; // Keeps "1.000"
+                         pct = pctValue; 
                     } else {
-                         pct = pctValue.substring(1); // Converts "0.500" to ".500"
+                         pct = pctValue.substring(1); 
                     }
                 }
-                // Games behind is calculated as half the difference between the leader's win-loss total and the team's win-loss total.
+                
+                // Games behind calculation (standard baseball formula)
                 const gb = ((leaderWins - team.wins) + (team.losses - confTeams[0].losses)) / 2;
                 
                 const row = `<tr>
@@ -405,8 +326,8 @@
         const locationHTML = game.location ? `<div class="game-location">📍 ${game.location}</div>` : '';
         const footerHTML = game.note ? `<div class="game-footer">${game.note}</div>` : '';
 
-        // Added onclick to call the modal function with the game's unique ID
-        return `<div class="game-card" onclick="openGameModal(${game.id})">
+        // Added onclick to call the function that opens the new tab
+        return `<div class="game-card" onclick="openGameDetailsTab(${game.id})">
             <div class="game-main">
                 <div>
                     <div class="game-info">${game.date}</div>
@@ -419,31 +340,72 @@
         </div>`;
     }
     
-    // NEW: Function to open the modal and populate its content
-    function openGameModal(gameId) {
+    // NEW: Function to open a new tab with game details
+    function openGameDetailsTab(gameId) {
         const game = games.find(g => g.id === gameId);
         if (!game) return;
 
-        document.getElementById('modal-matchup').textContent = `${game.visitor} @ ${game.home}`;
-        document.getElementById('modal-date').textContent = `Date: ${game.date}`;
-        document.getElementById('modal-location').textContent = game.location ? `Location: ${game.location}` : 'Location: Not specified';
-        document.getElementById('modal-score').textContent = game.score;
-        document.getElementById('modal-note').innerHTML = game.note ? `<strong>Note:</strong> ${game.note}` : '';
+        const date = game.date;
+        const matchup = `${game.visitor} @ ${game.home}`;
+        const location = game.location || 'Not specified';
+        const score = game.score;
+        const note = game.note || 'No special notes.';
 
-        document.getElementById('game-modal').style.display = 'block';
-    }
+        // Full HTML content for the new page
+        const newPageContent = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>OBL Game | ${matchup}</title>
+                <style>
+                    /* Styles for the new tab */
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
+                    .game-details { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #cc0a0a; border-bottom: 3px solid #1208cc; padding-bottom: 10px; }
+                    .info-block { margin-bottom: 20px; }
+                    .info-block label { font-weight: bold; color: #333; display: block; margin-bottom: 5px; }
+                    .info-block span { font-size: 1.1rem; color: #555; }
+                    .score-box { background: #333; color: white; padding: 15px 25px; border-radius: 5px; font-size: 2rem; font-family: monospace; display: inline-block; margin-top: 15px; }
+                    .note-section { border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 15px; font-style: italic; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="game-details">
+                    <h1>Game Details: ${matchup}</h1>
 
-    // NEW: Function to close the modal
-    function closeGameModal() {
-        document.getElementById('game-modal').style.display = 'none';
-    }
+                    <div class="info-block">
+                        <label>Date</label>
+                        <span>${date}</span>
+                    </div>
 
-    // NEW: Close modal when clicking outside of it
-    window.onclick = function(event) {
-        const modal = document.getElementById('game-modal');
-        if (event.target === modal) {
-            closeGameModal();
-        }
+                    <div class="info-block">
+                        <label>Location</label>
+                        <span>📍 ${location}</span>
+                    </div>
+
+                    <div class="info-block">
+                        <label>Final Score / Current Status</label>
+                        <div class="score-box">${score}</div>
+                    </div>
+
+                    <div class="note-section">
+                        <label>Special Note / Tournament Info</label>
+                        <p>${note}</p>
+                    </div>
+
+                    <p>--- Add Box Score, Stats, and Play-by-Play here ---</p>
+                    <p><a href="javascript:window.close();">Close Tab</a></p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Open new tab and write content
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(newPageContent);
+        newWindow.document.close();
     }
 
 
@@ -452,7 +414,6 @@
         const buttons = document.querySelectorAll('.btn');
         
         buttons.forEach(btn => btn.classList.remove('active'));
-        // Safely access event target
         if(event && event.target) event.target.classList.add('active');
 
         const filteredGames = games.filter(g => g.type === filterType);
