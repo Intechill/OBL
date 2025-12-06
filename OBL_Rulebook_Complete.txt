@@ -1,4 +1,4 @@
-OBL RULEBOOK — COMPLETE, FINAL VERSION
+OBL RULEBOOK — UPDATED VERSION
 
 1.  Field & Equipment 1.1 The field shall include clearly marked zones:
 
@@ -28,7 +28,19 @@ match begins.
 4.  Pitching & Strikes/Balls 4.1 A strike is any pitch that enters the
     strike zone and is not hit fairly. 4.2 A ball is any pitch that
     fails to enter the strike zone. 4.3 Four balls result in 1 point
-    awarded to the batter, then the count resets.
+    awarded to the batter, then the count resets. 4.4 Ground-Contact
+    Strike Rule:
+
+-   If a pitched ball touches the ground before reaching the batter, the
+    ball becomes dead immediately and is ruled a ball, but if hit ruled a strike as it touched down under the 20 foot line.
+-   The batter may still swing, but any swing after the bounce counts as
+    a strike. 4.5 Edge-Zone Rule:
+-   If a pitch lands on the edge of the strike zone, and it is
+    in-between or ambiguous, it is always ruled a ball. 4.6 Hit-By-Pitch
+    Rule:
+-   If the pitch hits the batter at all, in any manner, the batter’s
+    team automatically receives 1 point.
+-   The ball is immediately dead and the count resets.
 
 5.  Ball-in-Play Rules 5.1 If the pitcher catches the hit ball before it
     touches the ground, the batter is out. 5.2 Ground-Limit Rule:
@@ -61,32 +73,13 @@ match begins.
     a scoring dispute occurs.
 
 10. Overtime Rules 10.1 Overtime begins if the score is tied after 5
-    periods.
+    periods. 10.2 Structure of Overtime:
 
-10.2 Structure of Overtime 10.2.1 Overtime uses OT Periods, identical in
-structure to normal periods. 10.2.2 Each OT Period ends only after each
-player has pitched once and batted once. 10.2.3 Unlimited OT Periods may
-be played until a winner is determined.
-
-10.3 Overtime Objective 10.3.1 Each player must score +3 points above
-the score they entered OT with. 10.3.2 The OT target score does not
-increase within the same OT Period. 10.3.3 When a player reaches their
-+3 target, they immediately switch roles.
-
-10.4 Determining the Winner 10.4.1 If only one player reaches their +3
-target within an OT Period, they win immediately. 10.4.2 If both players
-reach their +3 target, the OT Period ends and another begins. 10.4.3 In
-the new OT Period, each player must again reach +3 above their previous
-ending score.
-
-10.5 Example - Game ends tied 10–10. - OT Period 1: Both must reach
-13. - If both do, OT Period 2: Both must reach 16. - Repeat until one
-player reaches their +3 target and the other does not.
-
-10.6 Special OT Clarifications 10.6.1 Overshooting the target still
-triggers immediate switching at the moment the target is crossed. 10.6.2
-Ball/strike counts reset when a player reaches their target. 10.6.3
-Sportsmanship rules still apply and may affect the required target.
-10.6.4 All normal gameplay rules remain active unless stated otherwise.
+-   OT periods function the same as normal periods. 10.3 Each player
+    must score +3 points above the score they entered OT with. 10.4 If
+    only one player reaches their +3 target, they win immediately. 10.5
+    Example: Game tied 10–10 → both must reach 13, then 16, etc. 10.6
+    Ball/strike counts reset when a player reaches their target; all
+    normal rules remain active.
 
 END OF RULEBOOK
