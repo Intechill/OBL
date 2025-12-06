@@ -181,6 +181,70 @@
             font-size: 0.8rem;
             color: #777;
         }
+
+        /* --- Modal (Popup) Styles --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top of everything */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            margin-top: -10px;
+            margin-right: -5px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        #modal-matchup {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        #modal-location, #modal-date, #modal-note {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        #modal-score {
+            display: inline-block;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -229,22 +293,37 @@
     &copy; 2024 Onehit Baseball League | Official League Website
 </footer>
 
+<div id="game-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeGameModal()">&times;</span>
+        <h3 id="modal-matchup"></h3>
+        <p id="modal-date"></p>
+        <p id="modal-location"></p>
+        <div id="modal-score" class="score"></div>
+        <div id="modal-note"></div>
+        <hr style="border-color: #ddd;">
+        <p>This is the detailed view.</p>
+    </div>
+</div>
+
 <script>
     /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
     
     // 1. EDIT STANDINGS HERE
     const teams = [
+        // Carsons (1-0) will now correctly show 1.000 PCT.
         { name: "Carsons Exhibition Team", conference: "Large 4", wins: 1, losses: 0, streak: "T1" },
         { name: "Averitts Exhibition Team", conference: "Large 4", wins: 1, losses: 1, streak: "T1" },
     ];
 
     // 2. EDIT GAMES HERE
+    // You can now add 'location' and 'note' to any game
     const games = [
            { 
             type: 'current', 
             date: 'Dec 6', 
             home: 'Averitts Exhibition Team', 
-            visitor: 'Carsons Exhibition Team', 
+            visitor: 'Carsons Exhibiton Team', 
             score: '5-5 (3P)', 
             location: 'Pat Raker Field', 
             note: 'Exhibition Rule Shootout Test' 
@@ -254,7 +333,7 @@
             type: 'current', 
             date: 'Dec 6', 
             home: 'Averitts Exhibition Team', 
-            visitor: 'Carsons Exhibition Team', 
+            visitor: 'Carsons Exhibiton Team', 
             score: '10-9', 
             location: 'Pat Raker Field', 
             note: 'Exhibition Rule Test Game' 
@@ -267,13 +346,13 @@
             visitor: 'Carsons Exhibition Team', 
             score: '45 - 42 (2 OT)', 
             location: 'Pat Raker Field',
-            note: '' 
+            note: 'First game of the year.' 
         },
     ];
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
 
-    // Preprocess games to add a unique ID for use in the new tab function
+    // Preprocess games to add a unique ID for modal usage
     games.forEach((game, index) => {
         game.id = index + 1;
     });
@@ -299,14 +378,14 @@
                 if (totalGames > 0) {
                     const pctValue = (team.wins / totalGames).toFixed(3);
                     
+                    // FIX: Correctly handle 1.000 (perfect record)
                     if (pctValue.startsWith('1')) {
-                         pct = pctValue; 
+                         pct = pctValue; // Keeps "1.000"
                     } else {
-                         pct = pctValue.substring(1); 
+                         pct = pctValue.substring(1); // Converts "0.500" to ".500"
                     }
                 }
-                
-                // Games behind calculation (standard baseball formula)
+                // Games behind is calculated as half the difference between the leader's win-loss total and the team's win-loss total.
                 const gb = ((leaderWins - team.wins) + (team.losses - confTeams[0].losses)) / 2;
                 
                 const row = `<tr>
@@ -326,8 +405,8 @@
         const locationHTML = game.location ? `<div class="game-location">📍 ${game.location}</div>` : '';
         const footerHTML = game.note ? `<div class="game-footer">${game.note}</div>` : '';
 
-        // Added onclick to call the function that opens the new tab
-        return `<div class="game-card" onclick="openGameDetailsTab(${game.id})">
+        // Added onclick to call the modal function with the game's unique ID
+        return `<div class="game-card" onclick="openGameModal(${game.id})">
             <div class="game-main">
                 <div>
                     <div class="game-info">${game.date}</div>
@@ -340,44 +419,30 @@
         </div>`;
     }
     
-    // Function to open a new tab with game details using a very short Data URL
-    function openGameDetailsTab(gameId) {
+    // Function to open the modal and populate its content
+    function openGameModal(gameId) {
         const game = games.find(g => g.id === gameId);
         if (!game) return;
 
-        const date = game.date;
-        const matchup = `${game.visitor} @ ${game.home}`;
-        const location = game.location || 'Not specified';
-        const score = game.score;
+        document.getElementById('modal-matchup').textContent = `${game.visitor} @ ${game.home}`;
+        document.getElementById('modal-date').textContent = `Date: ${game.date}`;
+        document.getElementById('modal-location').textContent = game.location ? `Location: ${game.location}` : 'Location: Not specified';
+        document.getElementById('modal-score').textContent = game.score;
+        document.getElementById('modal-note').innerHTML = game.note ? `<strong>Note:</strong> ${game.note}` : '';
 
-        // Minimal HTML content for the new page
-        // This includes just the core data points in basic format
-        const minimalContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <title>OBL Game</title>
-            </head>
-            <body>
-                <h2>Game Details</h2>
-                <p><strong>Matchup:</strong> ${matchup}</p>
-                <p><strong>Date:</strong> ${date}</p>
-                <p><strong>Location:</strong> ${location}</p>
-                <p><strong>Score:</strong> ${score}</p>
-            </body>
-            </html>
-        `;
+        document.getElementById('game-modal').style.display = 'block';
+    }
 
-        // Encode the content for a Data URL
-        // We use a simplified Data URL format to keep the URL as short as possible.
-        const dataUrl = 'data:text/html,' + encodeURIComponent(minimalContent.trim());
+    // Function to close the modal
+    function closeGameModal() {
+        document.getElementById('game-modal').style.display = 'none';
+    }
 
-        // Open the new tab using the Data URL
-        const newWindow = window.open(dataUrl, '_blank');
-         if (!newWindow) {
-            // Fallback: This code runs if the browser prevents the pop-up (often seen when the dynamic URL is too long/complex)
-            alert('Your browser blocked the new tab. Please check pop-up settings or try clicking the card again.');
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('game-modal');
+        if (event.target === modal) {
+            closeGameModal();
         }
     }
 
@@ -387,6 +452,7 @@
         const buttons = document.querySelectorAll('.btn');
         
         buttons.forEach(btn => btn.classList.remove('active'));
+        // Safely access event target
         if(event && event.target) event.target.classList.add('active');
 
         const filteredGames = games.filter(g => g.type === filterType);
