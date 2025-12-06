@@ -136,16 +136,35 @@
             background: white;
             border: 1px solid #ddd;
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             border-radius: 5px;
+            display: flex;
+            flex-direction: column; /* Changed to column to handle footer better */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .game-main {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
-        .game-info { font-size: 0.85rem; color: #666; }
+        .game-info { font-size: 0.85rem; color: #666; margin-bottom: 2px; }
+        .game-location { font-size: 0.85rem; color: var(--secondary); font-weight: 600; margin-bottom: 5px; }
         .matchup { font-weight: bold; font-size: 1.1rem; }
         .score { font-family: monospace; font-size: 1.2rem; background: #eee; padding: 5px 10px; border-radius: 5px; }
+
+        /* Game Footer Style */
+        .game-footer {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #ddd;
+            font-size: 0.85rem;
+            color: #555;
+            font-style: italic;
+            width: 100%;
+        }
 
         /* Footer */
         footer {
@@ -207,18 +226,33 @@
     /* --- DATA SECTION (EDIT THIS TO UPDATE YOUR SITE) --- */
     
     // 1. EDIT STANDINGS HERE
-    // Added 'conference' property to each team
     const teams = [
         { name: "Carsons Exhibition Team", conference: "Large 4", wins: 0, losses: 0, streak: "W0" },
         { name: "Averitts Exhibition Team", conference: "Large 4", wins: 0, losses: 0, streak: "W0" },
     ];
 
     // 2. EDIT GAMES HERE
-    // Type can be 'current' or 'previous'
+    // You can now add 'location' and 'note' to any game
     const games = [
-        { type: 'current', date: 'Dec 6', home: 'Averitts Exhibition Team', visitor: 'Carsons Exhibiton Team', score: 'TBD (A.E.T -6.5)' },
+        { 
+            type: 'current', 
+            date: 'Dec 6', 
+            home: 'Averitts Exhibition Team', 
+            visitor: 'Carsons Exhibiton Team', 
+            score: 'TBD (A.E.T -6.5)', 
+            location: 'Main Stadium', 
+            note: 'Pre-Season Exhibition Tournament' 
+        },
         
-        { type: 'previous', date: 'Dec 29 (2024)', home: 'Averitts Exhibition Team', visitor: 'Carsons Exhibition Team', score: '45 - 42 (2 OT)' },
+        { 
+            type: 'previous', 
+            date: 'Dec 29 (2024)', 
+            home: 'Averitts Exhibition Team', 
+            visitor: 'Carsons Exhibition Team', 
+            score: '45 - 42 (2 OT)', 
+            location: 'Field 2',
+            note: '' 
+        },
     ];
 
     /* --- LOGIC SECTION (DO NOT TOUCH UNLESS YOU KNOW JS) --- */
@@ -227,32 +261,22 @@
         const tbody = document.getElementById('standings-body');
         tbody.innerHTML = '';
 
-        // Get unique conferences and sort them
         const conferences = [...new Set(teams.map(t => t.conference))].sort();
 
         conferences.forEach(conf => {
-            // 1. Filter teams for this conference
             const confTeams = teams.filter(t => t.conference === conf);
-            
-            // 2. Sort teams by Wins (highest to lowest)
             confTeams.sort((a, b) => b.wins - a.wins);
 
-            // 3. Add Conference Header Row
             tbody.innerHTML += `<tr><td colspan="6" class="conf-header">${conf} Conference</td></tr>`;
 
-            // 4. Determine Leader Wins for GB Calculation
             const leaderWins = confTeams[0].wins;
 
-            // 5. Render Team Rows
             confTeams.forEach(team => {
                 const totalGames = team.wins + team.losses;
                 let pct = ".000";
-                
-                // Calculate PCT safely (avoid dividing by zero)
                 if (totalGames > 0) {
                     pct = (team.wins / totalGames).toFixed(3).substring(1);
                 }
-
                 const gb = leaderWins - team.wins; 
                 
                 const row = `<tr>
@@ -268,15 +292,31 @@
         });
     }
 
+    function renderGameCard(game) {
+        // Logic to check if note/location exists so we don't print "undefined" or empty boxes
+        const locationHTML = game.location ? `<div class="game-location">📍 ${game.location}</div>` : '';
+        const footerHTML = game.note ? `<div class="game-footer">${game.note}</div>` : '';
+
+        return `<div class="game-card">
+            <div class="game-main">
+                <div>
+                    <div class="game-info">${game.date}</div>
+                    ${locationHTML}
+                    <div class="matchup">${game.visitor} @ ${game.home}</div>
+                </div>
+                <div class="score">${game.score}</div>
+            </div>
+            ${footerHTML}
+        </div>`;
+    }
+
     function showGames(filterType) {
         const container = document.getElementById('games-list');
         const buttons = document.querySelectorAll('.btn');
         
-        // Update buttons
         buttons.forEach(btn => btn.classList.remove('active'));
         if(event) event.target.classList.add('active');
 
-        // Filter and Render games
         const filteredGames = games.filter(g => g.type === filterType);
         
         container.innerHTML = '';
@@ -287,23 +327,14 @@
         }
 
         filteredGames.forEach(game => {
-            const card = `<div class="game-card">
-                <div>
-                    <div class="game-info">${game.date}</div>
-                    <div class="matchup">${game.visitor} @ ${game.home}</div>
-                </div>
-                <div class="score">${game.score}</div>
-            </div>`;
-            container.innerHTML += card;
+            container.innerHTML += renderGameCard(game);
         });
     }
 
     // Initialize
     loadStandings();
     
-    // Simulate clicking "This Week" on load
-    // We pass null or dummy event to reuse logic if needed, 
-    // but here we just run the rendering manually for the default view.
+    // Simulate initial load for 'current' games
     const initialGames = games.filter(g => g.type === 'current');
     const containerEl = document.getElementById('games-list');
     
@@ -311,13 +342,7 @@
         containerEl.innerHTML = '<p>No games found for this period.</p>';
     } else {
         initialGames.forEach(game => {
-            containerEl.innerHTML += `<div class="game-card">
-                <div>
-                    <div class="game-info">${game.date}</div>
-                    <div class="matchup">${game.visitor} @ ${game.home}</div>
-                </div>
-                <div class="score">${game.score}</div>
-            </div>`;
+            containerEl.innerHTML += renderGameCard(game);
         });
     }
 
